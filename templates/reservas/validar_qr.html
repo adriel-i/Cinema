@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+
+{% block title %}Validar QR - CineMax{% endblock %}
+
+{% block extra_css %}
+<style>
+    .validation-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .validation-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .status-card {
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .status-valid {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+    
+    .status-used {
+        background: linear-gradient(135deg, #ffc107, #fd7e14);
+        color: white;
+    }
+    
+    .status-invalid {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+    }
+    
+    .reservation-details {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .detail-value {
+        text-align: right;
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+        text-align: center;
+    }
+    
+    .qr-info {
+        background: #e9ecef;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+        font-family: monospace;
+        font-size: 12px;
+        word-break: break-all;
+    }
+    
+    .validation-log {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Hero Section -->
+    <section class="hero-section bg-dark text-light py-4 mb-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <h1 class="display-5 fw-bold mb-3">Validación de Código QR</h1>
+                    <p class="lead mb-0">Verificación de entrada para acceso a la sala de cine.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="validation-container">
+        <div class="validation-header">
+            <i class="fas fa-qrcode fa-3x text-primary mb-3"></i>
+            <h2>Resultado de Validación</h2>
+        </div>
+
+        {% if es_valido %}
+            <!-- QR Válido -->
+            <div class="status-card status-valid">
+                <div class="text-center">
+                    <i class="fas fa-check-circle fa-4x mb-3"></i>
+                    <h3>Código QR Válido</h3>
+                    <p class="mb-0">La reserva es auténtica y no ha sido utilizada</p>
+                </div>
+            </div>
+
+            <div class="reservation-details">
+                <h5 class="mb-3"><i class="fas fa-ticket-alt me-2"></i>Detalles de la Reserva</h5>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Código de Reserva:</span>
+                    <span class="detail-value"><code>{{ reserva.codigo }}</code></span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Película:</span>
+                    <span class="detail-value"><strong>{{ reserva.funcion.pelicula.titulo }}</strong></span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Fecha y Hora:</span>
+                    <span class="detail-value">
+                        {{ reserva.funcion.fecha|date:"d/m/Y" }} {{ reserva.funcion.hora_inicio|time:"H:i" }}
+                    </span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Sala:</span>
+                    <span class="detail-value">{{ reserva.funcion.sala.nombre }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Asientos:</span>
+                    <span class="detail-value">
+                        {% for asiento in reserva.asientos_lista %}
+                            <span class="badge bg-primary me-1">{{ asiento }}</span>
+                        {% endfor %}
+                    </span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Cantidad de Entradas:</span>
+                    <span class="detail-value">{{ reserva.cantidad_entradas }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Total Pagado:</span>
+                    <span class="detail-value"><strong>${{ reserva.precio_total }}</strong></span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Estado de la Reserva:</span>
+                    <span class="detail-value">
+                        <span class="badge bg-success">Confirmada</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-success btn-lg" onclick="marcarComoUsado()">
+                    <i class="fas fa-check me-2"></i>Validar Entrada
+                </button>
+                <a href="{% url 'reservas:escaner_qr' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>Escanear Otro
+                </a>
+            </div>
+
+        {% elif ya_usado %}
+            <!-- QR Ya Usado -->
+            <div class="status-card status-used">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle fa-4x mb-3"></i>
+                    <h3>Código QR Ya Utilizado</h3>
+                    <p class="mb-0">Esta entrada ya fue validada anteriormente</p>
+                </div>
+            </div>
+
+            <div class="validation-log">
+                <h6><i class="fas fa-history me-2"></i>Información de Uso:</h6>
+                <p><strong>Fecha de uso:</strong> {{ validacion.fecha_uso|date:"d/m/Y H:i:s" }}</p>
+                {% if validacion.ip_validacion %}
+                    <p><strong>IP de validación:</strong> {{ validacion.ip_validacion }}</p>
+                {% endif %}
+                {% if validacion.user_agent %}
+                    <p><strong>Dispositivo:</strong> {{ validacion.user_agent|truncatechars:50 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="reservation-details">
+                <h5 class="mb-3"><i class="fas fa-ticket-alt me-2"></i>Detalles de la Reserva Original</h5>
+                <div class="detail-item">
+                    <span class="detail-label">Código:</span>
+                    <span class="detail-value"><code>{{ reserva.codigo }}</code></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Película:</span>
+                    <span class="detail-value">{{ reserva.funcion.pelicula.titulo }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Asientos:</span>
+                    <span class="detail-value">
+                        {% for asiento in reserva.asientos_lista %}
+                            <span class="badge bg-secondary me-1">{{ asiento }}</span>
+                        {% endfor %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{% url 'reservas:escaner_qr' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Escanear Otro QR
+                </a>
+            </div>
+
+        {% else %}
+            <!-- QR Inválido -->
+            <div class="status-card status-invalid">
+                <div class="text-center">
+                    <i class="fas fa-times-circle fa-4x mb-3"></i>
+                    <h3>Código QR Inválido</h3>
+                    <p class="mb-0">El código QR no es válido o la reserva no está activa</p>
+                </div>
+            </div>
+
+            <div class="reservation-details">
+                <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Posibles Causas:</h5>
+                <ul>
+                    <li>La reserva fue cancelada</li>
+                    <li>La función ya finalizó</li>
+                    <li>El código QR es incorrecto o dañado</li>
+                    <li>La reserva no está confirmada</li>
+                </ul>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Estado de la Reserva:</span>
+                    <span class="detail-value">
+                        {% if reserva.estado == 'cancelada' %}
+                            <span class="badge bg-danger">Cancelada</span>
+                        {% elif reserva.estado == 'temporal' %}
+                            <span class="badge bg-warning">Temporal</span>
+                        {% elif reserva.funcion.finalizada %}
+                            <span class="badge bg-secondary">Función Finalizada</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ reserva.estado }}</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{% url 'reservas:escaner_qr' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Escanear Otro QR
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Información Técnica -->
+        <div class="qr-info">
+            <h6><i class="fas fa-code me-2"></i>Información Técnica:</h6>
+            <p><strong>Hash QR:</strong> {{ validacion.qr_hash }}</p>
+            <p><strong>Fecha de Generación:</strong> {{ validacion.fecha_generacion|date:"d/m/Y H:i:s" }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function marcarComoUsado() {
+    const qrHash = '{{ validacion.qr_hash }}';
+    
+    // Mostrar confirmación
+    if (!confirm('¿Estás seguro de marcar esta entrada como validada? Esta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    // Deshabilitar botón
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Validando...';
+    
+    // Enviar petición AJAX
+    fetch(`/marcar-qr-usado/${qrHash}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar éxito
+            alert('Entrada validada exitosamente');
+            // Recargar página para mostrar estado actualizado
+            location.reload();
+        } else {
+            // Mostrar error
+            alert('Error: ' + data.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Validar Entrada';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al validar la entrada');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Validar Entrada';
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Auto-redirección después de 30 segundos para QR válidos
+// Nota: La lógica de auto-redirección se manejará del lado del servidor
+console.log('Página de validación cargada');
+</script>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Compras - CineMax{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-dark text-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">Mis Compras</h1>
+                <p class="lead mb-4">Revisa tu historial de reservas y compras. Gestiona tus entradas y mantén un registro de todas tus visitas al cine.</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-ticket-alt display-1 text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Historial de Compras -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Historial de Reservas</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-bold mb-0">
+                                <i class="fas fa-history me-2"></i>Tus Reservas
+                            </h3>
+                            <span class="badge bg-primary">{{ reservas.count }} Reserva{{ reservas.count|pluralize }}</span>
+                        </div>
+
+                    {% if reservas %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Película</th>
+                                        <th>Fecha y Hora</th>
+                                        <th>Asientos</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reserva in reservas %}
+                                        <tr>
+                                            <td>
+                                                <code class="text-primary">{{ reserva.codigo|slice:":8" }}...</code>
+                                            </td>
+                                            <td>
+                                                <strong>{{ reserva.funcion.pelicula.titulo }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ reserva.funcion.sala.nombre }}</small>
+                                            </td>
+                                            <td>
+                                                {{ reserva.funcion.fecha|date:"d/m/Y" }}
+                                                <br>
+                                                <small class="text-muted">{{ reserva.funcion.hora_inicio|time:"H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                {% for asiento in reserva.asientos_lista %}
+                                                    <span class="badge bg-secondary">{{ asiento }}</span>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                <strong>${{ reserva.precio_total }}</strong>
+                                            </td>
+                                            <td>
+                                                {% if reserva.estado == 'confirmada' %}
+                                                    <span class="badge bg-success">Confirmada</span>
+                                                {% elif reserva.estado == 'temporal' %}
+                                                    <span class="badge bg-warning">Temporal</span>
+                                                {% elif reserva.estado == 'cancelada' %}
+                                                    <span class="badge bg-danger">Cancelada</span>
+                                                {% elif reserva.estado == 'expirada' %}
+                                                    <span class="badge bg-secondary">Expirada</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'usuarios:detalle_reserva' reserva.codigo %}" 
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    {% if reserva.estado == 'temporal' and not reserva.expirada %}
+                                                        <button class="btn btn-sm btn-outline-success" 
+                                                                onclick="confirmarReserva('{{ reserva.codigo }}')">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" 
+                                                                onclick="cancelarReserva('{{ reserva.codigo }}')">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Resumen -->
+                        <div class="row mt-4">
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Confirmadas</h5>
+                                        <h3>{{ confirmadas }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Temporales</h5>
+                                        <h3>{{ temporales }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Canceladas</h5>
+                                        <h3>{{ canceladas }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Total Gastado</h5>
+                                        <h3>${{ total_gastado }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-ticket-alt fa-4x text-muted mb-3"></i>
+                            <h4 class="text-muted">No tienes reservas aún</h4>
+                            <p class="text-muted">¡Explora nuestra cartelera y reserva tus próximas películas!</p>
+                            <a href="{% url 'peliculas:cartelera' %}" class="btn btn-primary">
+                                <i class="fas fa-film me-2"></i>Ver Cartelera
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmarReserva(codigo) {
+    if (confirm('¿Estás seguro de que deseas confirmar esta reserva?')) {
+        fetch(`/reservas/confirmar/${codigo}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al confirmar la reserva');
+        });
+    }
+}
+
+function cancelarReserva(codigo) {
+    if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
+        fetch(`/reservas/cancelar/${codigo}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al cancelar la reserva');
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

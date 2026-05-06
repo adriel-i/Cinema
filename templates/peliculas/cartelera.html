@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Cartelera - CineMax{% endblock %}
+
+{% block extra_css %}
+<style>
+    .movie-card {
+        transition: transform 0.3s ease;
+    }
+    .movie-card:hover {
+        transform: translateY(-5px);
+    }
+    .movie-poster {
+        height: 400px;
+        object-fit: cover;
+    }
+    .filter-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-dark text-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">Cartelera</h1>
+                <p class="lead mb-4">Descubre todas nuestras películas en cartelera. Desde los últimos estrenos hasta los clásicos que no te puedes perder.</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-film display-1 text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filtros y Películas -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Películas Disponibles</h2>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+    <div class="filter-section">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5>Filtrar por género:</h5>
+                <form method="get" class="d-flex gap-2">
+                    <select name="genero" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos los géneros</option>
+                        {% for genero in generos %}
+                            <option value="{{ genero.id }}" {% if genero_seleccionado == genero.id|stringformat:"s" %}selected{% endif %}>
+                                {{ genero.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+            <div class="col-md-6 text-end">
+                <span class="text-muted">
+                    {{ peliculas_cartelera.count }} película{{ peliculas_cartelera.count|pluralize }} encontrada{{ peliculas_cartelera.count|pluralize }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Películas -->
+    {% if peliculas_cartelera %}
+        <div class="row g-4">
+            {% for pelicula in peliculas_cartelera %}
+                <div class="col-md-4 col-lg-3">
+                    <div class="card movie-card h-100">
+                        {% if pelicula.poster %}
+                            <img src="{{ pelicula.poster.url }}" class="card-img-top movie-poster" alt="{{ pelicula.titulo }}">
+                        {% else %}
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 400px;">
+                                <i class="fas fa-film fa-3x text-white"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ pelicula.titulo }}</h5>
+                            
+                            <!-- Géneros -->
+                            <div class="mb-2">
+                                {% for genero in pelicula.generos.all %}
+                                    <span class="badge bg-secondary me-1">{{ genero.nombre }}</span>
+                                {% endfor %}
+                            </div>
+                            
+                            <p class="card-text text-muted flex-grow-1">{{ pelicula.sinopsis|truncatewords:15 }}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-primary">{{ pelicula.clasificacion }}</span>
+                                <small class="text-muted">{{ pelicula.duracion }} min</small>
+                            </div>
+                            
+                            <!-- Rating -->
+                            <div class="mb-3">
+                                {% if pelicula.rating_promedio > 0 %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= pelicula.rating_promedio|floatformat:0 %}
+                                                    <i class="fas fa-star text-warning"></i>
+                                                {% else %}
+                                                    <i class="far fa-star text-warning"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <small class="text-muted">({{ pelicula.rating_promedio|floatformat:1 }})</small>
+                                    </div>
+                                {% else %}
+                                    <small class="text-muted">Sin calificación</small>
+                                {% endif %}
+                            </div>
+                            
+                            <a href="{% url 'peliculas:detalle' pelicula.id %}" class="btn btn-primary w-100 mt-auto">
+                                Ver Funciones
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-film fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No hay películas en cartelera</h4>
+            <p class="text-muted">Pronto estrenaremos nuevas películas. ¡Vuelve pronto!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

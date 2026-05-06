@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Perfil - CineMax{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-dark text-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">Mi Perfil</h1>
+                <p class="lead mb-4">Gestiona tu información personal y preferencias. Mantén tu perfil actualizado para una mejor experiencia en CineMax.</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-user display-1 text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Formulario de Perfil -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Actualizar Información</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-lg-6 mx-auto">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold">
+                                <i class="fas fa-user-circle me-2"></i>Datos Personales
+                            </h3>
+                            <p class="text-muted">Modifica tu información cuando lo necesites</p>
+                        </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if user_form.non_field_errors or perfil_form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in user_form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                                {% for error in perfil_form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <h5 class="mb-3"><i class="fas fa-user-circle me-2"></i>Información Personal</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.first_name.id_for_label }}" class="form-label">Nombre</label>
+                                {{ user_form.first_name }}
+                                {% if user_form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in user_form.first_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Apellido</label>
+                                {{ user_form.last_name }}
+                                {% if user_form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in user_form.last_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ user_form.email.id_for_label }}" class="form-label">Email</label>
+                            {{ user_form.email }}
+                            {% if user_form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in user_form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="mb-3"><i class="fas fa-cog me-2"></i>Preferencias</h5>
+
+                        <div class="mb-3">
+                            <label for="{{ perfil_form.genero_preferido.id_for_label }}" class="form-label">Género Preferido</label>
+                            {{ perfil_form.genero_preferido }}
+                            {% if perfil_form.genero_preferido.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in perfil_form.genero_preferido.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ perfil_form.notificaciones_email.id_for_label }}" class="form-label">Notificaciones por Email</label>
+                            <div class="form-check form-switch">
+                                {{ perfil_form.notificaciones_email }}
+                                <label class="form-check-label" for="{{ perfil_form.notificaciones_email.id_for_label }}">
+                                    Recibir notificaciones sobre nuevas películas y promociones
+                                </label>
+                            </div>
+                            {% if perfil_form.notificaciones_email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in perfil_form.notificaciones_email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ perfil_form.biografia.id_for_label }}" class="form-label">Biografía</label>
+                            {{ perfil_form.biografia }}
+                            {% if perfil_form.biografia.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in perfil_form.biografia.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'index' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Información de la cuenta -->
+            <div class="card shadow mt-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Información de la Cuenta</h5>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <p class="mb-2"><strong>Usuario:</strong> {{ user.username }}</p>
+                            <p class="mb-2"><strong>Fecha de Registro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-2"><strong>Último Inicio:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
+                            <p class="mb-2"><strong>Estado:</strong> 
+                                <span class="badge bg-success">Activo</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add Bootstrap classes to form fields
+document.addEventListener('DOMContentLoaded', function() {
+    const formFields = document.querySelectorAll('input[type="text"], input[type="email"], select, textarea');
+    formFields.forEach(function(field) {
+        field.classList.add('form-control');
+    });
+    
+    const checkboxField = document.querySelector('input[type="checkbox"]');
+    if (checkboxField) {
+        checkboxField.classList.add('form-check-input');
+    }
+});
+</script>
+{% endblock %}

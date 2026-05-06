@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pelicula.titulo }} - CineMax{% endblock %}
+
+{% block extra_css %}
+<style>
+    .movie-poster-detail {
+        max-height: 500px;
+        object-fit: cover;
+    }
+    .rating-stars {
+        color: #ffc107;
+    }
+    .funcion-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .funcion-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .trailer-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+    }
+    .trailer-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'peliculas:cartelera' %}">Cartelera</a></li>
+            <li class="breadcrumb-item active">{{ pelicula.titulo }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Poster y Trailer -->
+        <div class="col-lg-4">
+            {% if pelicula.poster %}
+                <img src="{{ pelicula.poster.url }}" class="img-fluid rounded movie-poster-detail mb-3" alt="{{ pelicula.titulo }}">
+            {% else %}
+                <div class="bg-secondary rounded d-flex align-items-center justify-content-center mb-3" style="height: 500px;">
+                    <i class="fas fa-film fa-5x text-white"></i>
+                </div>
+            {% endif %}
+            
+            {% if pelicula.trailer_url %}
+                <h5 class="mb-3">Trailer</h5>
+                <div class="trailer-container rounded overflow-hidden">
+                    <iframe src="{{ pelicula.trailer_url }}" frameborder="0" allowfullscreen></iframe>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Información de la Película -->
+        <div class="col-lg-8">
+            <h1 class="display-5 fw-bold mb-3">{{ pelicula.titulo }}</h1>
+            
+            <!-- Rating y Calificación -->
+            <div class="d-flex align-items-center mb-3">
+                <div class="rating-stars me-3">
+                    {% if pelicula.rating_promedio > 0 %}
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= pelicula.rating_promedio|floatformat:0 %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="ms-2">({{ pelicula.rating_promedio|floatformat:1 }}/5)</span>
+                    {% else %}
+                        <span class="text-muted">Sin calificación</span>
+                    {% endif %}
+                </div>
+                <span class="badge bg-primary fs-6">{{ pelicula.clasificacion }}</span>
+            </div>
+
+            <!-- Géneros -->
+            <div class="mb-3">
+                {% for genero in pelicula.generos.all %}
+                    <span class="badge bg-secondary me-2">{{ genero.nombre }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Sinopsis -->
+            <div class="mb-4">
+                <h4>Sinopsis</h4>
+                <p>{{ pelicula.sinopsis }}</p>
+            </div>
+
+            <!-- Detalles Técnicos -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Información</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Duración:</strong> {{ pelicula.duracion }} minutos</li>
+                        <li><strong>Director:</strong> {{ pelicula.director }}</li>
+                        <li><strong>Fecha de estreno:</strong> {{ pelicula.fecha_estreno }}</li>
+                        <li><strong>Idioma:</strong> {{ pelicula.idioma_original }}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>Formatos disponibles</h5>
+                    <ul class="list-unstyled">
+                        {% if pelicula.doblada %}<li><i class="fas fa-check text-success"></i> Doblada</li>{% endif %}
+                        {% if pelicula.subtitulos %}<li><i class="fas fa-check text-success"></i> Subtitulada</li>{% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Reparto -->
+            <div class="mb-4">
+                <h5>Reparto Principal</h5>
+                <p>{{ pelicula.actores_principales }}</p>
+            </div>
+
+            <!-- Calificación de Usuario -->
+            {% if user.is_authenticated %}
+                {% if not usuario_ya_califico %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Calificar esta película</h5>
+                            <form id="ratingForm" method="post" action="{% url 'peliculas:calificar' pelicula.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label">Tu calificación:</label>
+                                    <div class="btn-group" role="group">
+                                        {% for i in "12345" %}
+                                            <input type="radio" class="btn-check" name="puntuacion" id="star{{ i }}" value="{{ i }}" required>
+                                            <label class="btn btn-outline-warning" for="star{{ i }}">
+                                                <i class="fas fa-star"></i>
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <textarea class="form-control" name="comentario" rows="3" placeholder="Tu comentario (opcional)"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Enviar Calificación</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- Funciones Disponibles -->
+            {% if funciones %}
+                <div class="mb-4">
+                    <h4>Funciones Disponibles</h4>
+                    <div class="row g-3">
+                        {% for funcion in funciones %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card funcion-card" onclick="window.location.href='{% url 'reservas:seleccionar_asientos' funcion.id %}'">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ funcion.fecha|date:"d M Y" }}</h6>
+                                        <p class="card-text">
+                                            <strong>{{ funcion.hora_inicio|time:"H:i" }}</strong> - {{ funcion.hora_fin|time:"H:i" }}<br>
+                                            <small class="text-muted">
+                                                Sala {{ funcion.sala.nombre }} | {{ funcion.formato.nombre }}<br>
+                                                ${{ funcion.precio_base }}
+                                            </small>
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-success">{{ funcion.asientos_disponibles }} disponibles</span>
+                                            <small class="text-primary">Seleccionar →</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay funciones programadas para esta película en este momento.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Reseñas de Usuarios -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Reseñas de Usuarios</h3>
+            {% if ratings %}
+                {% for rating in ratings %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-0">{{ rating.usuario.get_full_name }}</h6>
+                                    <div class="rating-stars">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= rating.puntuacion %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ rating.fecha_creacion|date:"d M Y" }}</small>
+                            </div>
+                            {% if rating.comentario %}
+                                <p class="mb-0">{{ rating.comentario }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No hay reseñas para esta película. ¡Sé el primero en calificarla!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('ratingForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+</script>
+{% endblock %}

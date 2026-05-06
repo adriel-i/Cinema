@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro - CineMax{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-primary">
+                            <i class="fas fa-film me-2"></i>CineMax
+                        </h3>
+                        <p class="text-muted">Crear Cuenta</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-1"></i>Nombre
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.first_name.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-1"></i>Apellido
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.last_name.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-id-badge me-1"></i>Nombre de Usuario
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.username.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Este será tu nombre de usuario para iniciar sesión.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-envelope me-1"></i>Email
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.email.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Te enviaremos confirmaciones y notificaciones a este email.</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.dni.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-id-card me-1"></i>DNI
+                                </label>
+                                {{ form.dni }}
+                                {% if form.dni.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.dni.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.telefono.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-phone me-1"></i>Teléfono
+                                </label>
+                                {{ form.telefono }}
+                                {% if form.telefono.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.telefono.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-calendar me-1"></i>Fecha de Nacimiento
+                            </label>
+                            {{ form.fecha_nacimiento }}
+                            {% if form.fecha_nacimiento.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.fecha_nacimiento.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-lock me-1"></i>Contraseña
+                                </label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.password1.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small style="display: block;" class="form-text text-muted">Mínimo 8 caracteres, con mayúsculas, minúsculas y números.</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-lock me-1"></i>Confirmar Contraseña
+                                </label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.password2.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+                            
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="termsCheck" required>
+                            <label class="form-check-label" for="termsCheck">
+                                Acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-primary">términos y condiciones</a> y la <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal" class="text-primary">política de privacidad</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Crear Cuenta
+                            </button>
+                            <a href="{% url 'usuarios:login' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>¿Ya tienes cuenta? Inicia Sesión
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Términos y Condiciones -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Términos y Condiciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Aceptación de los Términos</h6>
+                <p>Al registrarte en CineMax, aceptas estos términos y condiciones.</p>
+                
+                <h6>2. Uso del Servicio</h6>
+                <p>Te comprometes a usar el servicio de manera responsable y no para fines ilegales.</p>
+                
+                <h6>3. Cuentas de Usuario</h6>
+                <p>Eres responsable de mantener la confidencialidad de tu cuenta y contraseña.</p>
+                
+                <h6>4. Compras y Pagos</h6>
+                <p>Las compras de entradas están sujetas a disponibilidad y políticas de cancelación.</p>
+                
+                <h6>5. Privacidad</h6>
+                <p>Respetamos tu privacidad y protegemos tus datos personales según nuestra política.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Política de Privacidad -->
+<div class="modal fade" id="privacyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Política de Privacidad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Información que Recopilamos</h6>
+                <p>Recopilamos información personal como nombre, email, teléfono y datos de pago.</p>
+                
+                <h6>Uso de la Información</h6>
+                <p>Usamos tu información para procesar reservas, mejorar nuestros servicios y comunicarnos contigo.</p>
+                
+                <h6>Protección de Datos</h6>
+                <p>Implementamos medidas de seguridad para proteger tu información personal.</p>
+                
+                <h6>Compartir Información</h6>
+                <p>No vendemos ni compartimos tu información con terceros sin tu consentimiento.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

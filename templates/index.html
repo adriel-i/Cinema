@@ -1,0 +1,136 @@
+<!-- python manage.py runserver -->
+
+{% extends 'base.html' %}
+
+{% block title %}CineMax - Inicio{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-dark text-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Bienvenido a CineMax</h1>
+                <p class="lead mb-4">Vive la mejor experiencia cinematográfica con nuestras películas en estreno, salas VIP y tecnología de última generación.</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'peliculas:cartelera' %}" class="btn btn-primary btn-lg">Ver Cartelera</a>
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-light btn-lg">Registrarse</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-film display-1 text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Películas Destacadas -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Películas en Cartelera</h2>
+        
+        {% if peliculas_cartelera %}
+            <div class="row g-4">
+                {% for pelicula in peliculas_cartelera|slice:":6" %}
+                    <div class="col-md-4">
+                        <div class="card h-100 movie-card">
+                            {% if pelicula.poster %}
+                                <img src="{{ pelicula.poster.url }}" class="card-img-top movie-poster" alt="{{ pelicula.titulo }}">
+                            {% else %}
+                                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 400px;">
+                                    <i class="fas fa-film fa-3x text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ pelicula.titulo }}</h5>
+                                <p class="card-text text-muted">{{ pelicula.sinopsis|truncatewords:20 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">{{ pelicula.clasificacion }}</span>
+                                    <span class="text-muted">{{ pelicula.duracion }} min</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'peliculas:detalle' pelicula.id %}" class="btn btn-outline-primary w-100">Ver Detalles</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'peliculas:cartelera' %}" class="btn btn-primary">Ver Todas las Películas</a>
+            </div>
+        {% else %}
+            <div class="text-center">
+                <p class="text-muted">No hay películas en cartelera en este momento.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Próximos Estrenos -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Próximos Estrenos</h2>
+        
+        {% if proximos_estrenos %}
+            <div class="row g-4">
+                {% for pelicula in proximos_estrenos %}
+                    <div class="col-md-3">
+                        <div class="card h-100">
+                            {% if pelicula.poster %}
+                                <img src="{{ pelicula.poster.url }}" class="card-img-top" alt="{{ pelicula.titulo }}" style="height: 250px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 250px;">
+                                    <i class="fas fa-film fa-2x text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h6 class="card-title">{{ pelicula.titulo }}</h6>
+                                <p class="card-text small text-muted">Estreno: {{ pelicula.fecha_estreno }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center">
+                <p class="text-muted">No hay próximos estrenos anunciados.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Servicios -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Nuestros Servicios</h2>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="service-icon mb-3">
+                    <i class="fas fa-couch fa-3x text-primary"></i>
+                </div>
+                <h4>Salas VIP</h4>
+                <p>Disfruta de nuestras butacas reclinables y servicio exclusivo.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="service-icon mb-3">
+                    <i class="fas fa-glasses fa-3x text-primary"></i>
+                </div>
+                <h4>3D e IMAX</h4>
+                <p>Vive la experiencia cinematográfica más inmersiva.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="service-icon mb-3">
+                    <i class="fas fa-bowl-food fa-3x text-primary"></i>
+                </div>
+                <h4>Combos y Snacks</h4>
+                <p>Disfruta de nuestros combos especiales de palomitas y bebidas.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
