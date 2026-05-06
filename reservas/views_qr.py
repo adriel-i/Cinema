@@ -69,9 +69,20 @@ def marcar_qr_usado(request, qr_hash):
             'message': f'Error al validar el código QR: {str(e)}'
         })
 
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def escaner_qr(request):
     """Vista principal del escáner de QR"""
-    return render(request, 'reservas/escaner_qr.html')
+    # Verificar si el usuario es staff
+    if not request.user.es_staff:
+        return render(request, 'reservas/escaner_qr.html')
+    
+    # Si es staff, mostrar información adicional
+    return render(request, 'reservas/escaner_qr_staff.html', {
+        'user': request.user,
+        'es_staff': True
+    })
 
 @csrf_exempt
 def regenerar_qr(request, reserva_codigo):

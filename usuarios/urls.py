@@ -15,4 +15,9 @@ urlpatterns = [
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='usuarios/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='usuarios/password_reset_complete.html'), name='password_reset_complete'),
+    
+    # URLs para personal del cine
+    path('staff/', views_staff.staff_login, name='staff_login'),
+    path('staff/dashboard/', views_staff.staff_dashboard, name='staff_dashboard'),
+    path('staff/logout/', views_staff.staff_logout, name='staff_logout'),
 ]

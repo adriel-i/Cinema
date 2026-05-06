@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Personal - CineMax{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header del Dashboard -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h4 class="mb-0">
+                                <i class="fas fa-user-tie me-2"></i>
+                                Bienvenido, {{ user.first_name }} {{ user.last_name }}
+                            </h4>
+                            <p class="mb-0 text-white-50">
+                                <i class="fas fa-briefcase me-1"></i>
+                                {{ user.get_rol_display }}
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="dropdown">
+                                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user me-2"></i>{{ user.username }}
+                                    <i class="fas fa-chevron-down ms-2"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
+                                        <i class="fas fa-user me-2"></i>Mi Perfil
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'reservas:escaner_qr' %}">
+                                        <i class="fas fa-qrcode me-2"></i>Escáner QR
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'usuarios:staff_logout' %}">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Principales -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
+                    <h3 class="card-title">{{ validaciones_hoy }}</h3>
+                    <p class="text-muted">Validaciones Hoy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-qrcode fa-3x text-success mb-3"></i>
+                    <h3 class="card-title">{{ validaciones_totales }}</h3>
+                    <p class="text-muted">Total Validaciones</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-3x text-info mb-3"></i>
+                    <h3 class="card-title">{{ hoy|date:"d/m/Y" }}</h3>
+                    <p class="text-muted">Fecha Actual</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-shield fa-3x text-warning mb-3"></i>
+                    <h3 class="card-title">Staff</h3>
+                    <p class="text-muted">Modo Activo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validaciones Recientes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Validaciones Recientes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if validaciones_recientes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Hora</th>
+                                        <th>Película</th>
+                                        <th>Asientos</th>
+                                        <th>Usuario</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for validacion in validaciones_recientes %}
+                                    <tr>
+                                        <td>{{ validacion.fecha_uso|time:"H:i" }}</td>
+                                        <td>
+                                            <strong>{{ validacion.reserva.funcion.pelicula.titulo }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ validacion.reserva.funcion.fecha|date:"d/m/Y" }} {{ validacion.reserva.funcion.hora_inicio|time:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            {% for asiento in validacion.reserva.asientos_lista %}
+                                                <span class="badge bg-primary me-1">{{ asiento }}</span>
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ validacion.reserva.usuario.first_name }} {{ validacion.reserva.usuario.last_name }}</td>
+                                        <td>
+                                            <span class="badge bg-success">Validado</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hay validaciones recientes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos específicos para el dashboard -->
+<style>
+.bg-gradient {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-secondary) 100%);
+}
+
+.card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border: none;
+}
+
+.badge {
+    font-size: 0.8em;
+}
+
+.fa-3x {
+    font-size: 3rem;
+}
+
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+</style>
+{% endblock %}

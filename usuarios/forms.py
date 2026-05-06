@@ -40,6 +40,21 @@ class CustomAuthenticationForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña'})
     )
 
+class StaffLoginForm(AuthenticationForm):
+    """Formulario de login específico para personal del cine"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = 'Usuario o Email'
+        self.fields['username'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Usuario o Email del Personal'
+        })
+        self.fields['password'].label = 'Contraseña'
+        self.fields['password'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Contraseña del Personal'
+        })
+
 class UsuarioUpdateForm(forms.ModelForm):
     class Meta:
         model = Usuario
