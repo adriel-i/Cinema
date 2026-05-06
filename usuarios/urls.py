@@ -20,4 +20,9 @@ urlpatterns = [
     path('staff/', views_staff.staff_login, name='staff_login'),
     path('staff/dashboard/', views_staff.staff_dashboard, name='staff_dashboard'),
     path('staff/logout/', views_staff.staff_logout, name='staff_logout'),
+    
+    # URLs para gestión de usuarios staff
+    path('staff/gestion/', views_staff.gestion_staff, name='gestion_staff'),
+    path('staff/editar/<int:user_id>/', views_staff.editar_usuario_staff, name='editar_usuario_staff'),
+    path('staff/eliminar/<int:user_id>/', views_staff.eliminar_usuario_staff, name='eliminar_usuario_staff'),
 ]
