@@ -6,7 +6,12 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cinema_project.settings')
+    # Detectar si estamos en Render.com
+    if os.environ.get('RENDER_SERVICE_ID'):
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cinema_project.settings_production')
+    else:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cinema_project.settings')
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

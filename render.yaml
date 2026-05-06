@@ -1,0 +1,38 @@
+services:
+  # Django Web Service
+  - type: web
+    name: cinema-django
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn cinema_project.wsgi:application
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.2
+      - key: DJANGO_SETTINGS_MODULE
+        value: cinema_project.settings
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cinema-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+
+  # PostgreSQL Database
+  - type: pserv
+    name: cinema-db
+    env: postgres
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: POSTGRES_DB
+        value: cinema_db
+      - key: POSTGRES_USER
+        value: cinema_user
+      - key: POSTGRES_PASSWORD
+        generateValue: true
